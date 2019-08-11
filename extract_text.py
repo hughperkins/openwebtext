@@ -7,6 +7,7 @@ from hashlib import md5
 import multiprocessing as mpl
 import os.path as op
 import pathlib as pl
+import shutil
 
 import newspaper
 from tqdm import tqdm
@@ -44,15 +45,18 @@ def get_processed_files(out_dir):
 
 
 def parse_archive(archive_fp, out_dir, n_procs, chunk_size=100):
-    tmp_data_dir = pl.Path(archive_fp).with_suffix(".tmp")
+    from os import path
+    tmp_data_dir = '/tmp/extract_text/'
 
     # extract tar first
-    if tmp_data_dir.exists():
-        raise FileExistsError("Trying to extract archive to {}".format(tmp_data_dir))
-    else:
-        tar = tarfile.open(archive_fp)
-        tar.extractall(tmp_data_dir)
-        tar.close()
+    if path.exists(tmp_data_dir):
+        shutil.rmtree(tmp_data_dir)
+        # raise FileExistsError("Trying to extract archive to {}".format(tmp_data_dir))
+
+    tmp_data_dir = pl.Path(tmp_data_dir)
+    tar = tarfile.open(archive_fp)
+    tar.extractall(tmp_data_dir)
+    tar.close()
 
     # get files to process
     processed_files = set(get_processed_files(out_dir))
